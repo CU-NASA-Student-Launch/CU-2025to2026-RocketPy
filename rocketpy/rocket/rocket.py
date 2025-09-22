@@ -1,4 +1,6 @@
 import math
+import warnings
+from typing import Iterable
 
 import numpy as np
 
@@ -21,7 +23,11 @@ from rocketpy.rocket.aero_surface.fins.free_form_fins import FreeFormFins
 from rocketpy.rocket.aero_surface.generic_surface import GenericSurface
 from rocketpy.rocket.components import Components
 from rocketpy.rocket.parachute import Parachute
-from rocketpy.tools import deprecated, parallel_axis_theorem_from_com
+from rocketpy.tools import (
+    deprecated,
+    find_obj_from_hash,
+    parallel_axis_theorem_from_com,
+)
 
 
 # pylint: disable=too-many-instance-attributes, too-many-public-methods, too-many-instance-attributes
@@ -2070,17 +2076,29 @@ class Rocket:
         for parachute in data["parachutes"]:
             rocket.parachutes.append(parachute)
 
-        for air_brakes in data["air_brakes"]:
-            rocket.add_air_brakes(
-                drag_coefficient_curve=air_brakes["drag_coefficient_curve"],
-                controller_function=air_brakes["controller_function"],
-                sampling_rate=air_brakes["sampling_rate"],
-                clamp=air_brakes["clamp"],
-                reference_area=air_brakes["reference_area"],
-                initial_observed_variables=air_brakes["initial_observed_variables"],
-                override_rocket_drag=air_brakes["override_rocket_drag"],
-                name=air_brakes["name"],
-                controller_name=air_brakes["controller_name"],
-            )
+        for sensor, position in data["sensors"]:
+            rocket.add_sensor(sensor, position)
+
+        for air_brake in data["air_brakes"]:
+            rocket.air_brakes.append(air_brake)
+
+        for controller in data["_controllers"]:
+            interactive_objects_hash = getattr(controller, "_interactive_objects_hash")
+            if interactive_objects_hash is not None:
+                is_iterable = isinstance(interactive_objects_hash, Iterable)
+                if not is_iterable:
+                    interactive_objects_hash = [interactive_objects_hash]
+                for hash_ in interactive_objects_hash:
+                    if (hashed_obj := find_obj_from_hash(data, hash_)) is not None:
+                        if not is_iterable:
+                            controller.interactive_objects = hashed_obj
+                        else:
+                            controller.interactive_objects.append(hashed_obj)
+                    else:
+                        warnings.warn(
+                            "Could not find controller interactive objects."
+                            "Deserialization will proceed, results may not be accurate."
+                        )
+            rocket._add_controllers(controller)
 
         return rocket

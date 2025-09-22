@@ -762,12 +762,10 @@ class Flight:
                             lambda self, parachute_cd_s=parachute.cd_s: setattr(
                                 self, "parachute_cd_s", parachute_cd_s
                             ),
-                            lambda self,
-                            parachute_radius=parachute.parachute_radius: setattr(
+                            lambda self, parachute_radius=parachute.radius: setattr(
                                 self, "parachute_radius", parachute_radius
                             ),
-                            lambda self,
-                            parachute_height=parachute.parachute_height: setattr(
+                            lambda self, parachute_height=parachute.height: setattr(
                                 self, "parachute_height", parachute_height
                             ),
                             lambda self, parachute_porosity=parachute.porosity: setattr(
@@ -3575,7 +3573,6 @@ class Flight:
             "x_impact": self.x_impact,
             "y_impact": self.y_impact,
             "t_final": self.t_final,
-            "flight_phases": self.flight_phases,
             "function_evaluations": self.function_evaluations,
             "ax": self.ax,
             "ay": self.ay,
@@ -3589,6 +3586,7 @@ class Flight:
             "M1": self.M1,
             "M2": self.M2,
             "M3": self.M3,
+            "net_thrust": self.net_thrust,
         }
 
         if kwargs.get("include_outputs", False):
