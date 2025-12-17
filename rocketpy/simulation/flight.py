@@ -1569,7 +1569,7 @@ class Flight:
                     -0.5
                     * rho
                     * (free_stream_speed**2)
-                    * air_brakes.reference_area
+                    * 0.0001 * (air_brakes.deployment_level * 40)
                     * air_brakes_cd
                 )
                 if air_brakes.override_rocket_drag:
@@ -1852,7 +1852,7 @@ class Flight:
                     -0.5
                     * rho
                     * (free_stream_speed**2)
-                    * air_brakes.reference_area
+                    * 0.0001 * (air_brakes.deployment_level * 40)
                     * air_brakes_cd
                 )
                 if air_brakes.override_rocket_drag:
