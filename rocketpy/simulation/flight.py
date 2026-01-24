@@ -1,3 +1,4 @@
+import csv
 # pylint: disable=too-many-lines
 import math
 import warnings
@@ -1561,21 +1562,27 @@ class Flight:
         rho = self.env.density.get_value_opt(z)
         R3 = -0.5 * rho * (free_stream_speed**2) * self.rocket.area * drag_coeff
         for air_brakes in self.rocket.air_brakes:
-            if air_brakes.deployment_level > 0:
+            if air_brakes.deployment_level >= 0:
                 air_brakes_cd = air_brakes.drag_coefficient.get_value_opt(
                     air_brakes.deployment_level, free_stream_mach
                 )
+
+                with open('CSVlog/u_dot_var_log.csv', mode='a') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([str(t), str(rho), str(free_stream_speed), str(air_brakes.deployment_level), str(air_brakes_cd), str(self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))])
+                
                 air_brakes_force = (
                     -0.5
                     * rho
                     * (free_stream_speed**2)
-                    * 0.0001 * (air_brakes.deployment_level * 40)
+                    * (self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))
                     * air_brakes_cd
                 )
                 if air_brakes.override_rocket_drag:
                     R3 = air_brakes_force  # Substitutes rocket drag coefficient
                 else:
                     R3 += air_brakes_force
+
         # Off center moment
         M1 += self.rocket.cp_eccentricity_y * R3
         M2 -= self.rocket.cp_eccentricity_x * R3
@@ -1844,21 +1851,28 @@ class Flight:
             drag_coeff = self.rocket.power_off_drag.get_value_opt(free_stream_mach)
         R3 += -0.5 * rho * (free_stream_speed**2) * self.rocket.area * drag_coeff
         for air_brakes in self.rocket.air_brakes:
-            if air_brakes.deployment_level > 0:
+            if air_brakes.deployment_level >= 0:
                 air_brakes_cd = air_brakes.drag_coefficient.get_value_opt(
                     air_brakes.deployment_level, free_stream_mach
                 )
+                
+                with open('CSVlog/u_dot_gen_var_log.csv', mode='a') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([str(t), str(rho), str(free_stream_speed), str(air_brakes.deployment_level), str(air_brakes_cd), str(self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))])
+                
+
                 air_brakes_force = (
                     -0.5
                     * rho
                     * (free_stream_speed**2)
-                    * 0.0001 * (air_brakes.deployment_level * 40)
+                    * (self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))
                     * air_brakes_cd
                 )
                 if air_brakes.override_rocket_drag:
                     R3 = air_brakes_force  # Substitutes rocket drag coefficient
                 else:
                     R3 += air_brakes_force
+
         # Get rocket velocity in body frame
         velocity_in_body_frame = Kt @ v
         # Calculate lift and moment for each component of the rocket
