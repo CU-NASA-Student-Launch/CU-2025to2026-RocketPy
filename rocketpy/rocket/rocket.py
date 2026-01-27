@@ -18,6 +18,7 @@ from rocketpy.rocket.aero_surface import (
     RailButtons,
     Tail,
     TrapezoidalFins,
+    Canards
 )
 from rocketpy.rocket.aero_surface.fins.free_form_fins import FreeFormFins
 from rocketpy.rocket.aero_surface.generic_surface import GenericSurface
@@ -316,6 +317,7 @@ class Rocket:
         self.parachutes = []
         self._controllers = []
         self.air_brakes = []
+        self.canards = []
         self.sensors = Components()
         self.aerodynamic_surfaces = Components()
         self.surfaces_cp_to_cdm = {}
@@ -1718,6 +1720,122 @@ class Rocket:
         else:
             return air_brakes
 
+    def add_canards(
+        self,
+        drag_coefficient_curve,
+        lift_coefficient_curve,
+        cop_curve,
+        controller_function,
+        sampling_rate,
+        reference_length,
+        reference_area=None,
+        initial_observed_variables=None,
+        return_controller=False,
+        name="AirBrakes",
+        controller_name="AirBrakes Controller",
+    ):
+        """Creates a new canards system, storing its parameters such as
+        drag coefficient curve, controller function, sampling rate, and
+        reference area.
+
+        Parameters
+        ----------
+        drag_coefficient_curve : int, float, callable, array, string, Function
+        lift_coefficient_curve: str
+        cop_curve : string    
+        controller_function : function, callable
+            An user-defined function responsible for controlling the simulation.
+            This function is expected to take the following arguments, in order:
+
+            1. `time` (float): The current simulation time in seconds.
+            2. `sampling_rate` (float): The rate at which the controller
+               function is called, measured in Hertz (Hz).
+            3. `state` (list): The state vector of the simulation, structured as
+               `[x, y, z, vx, vy, vz, e0, e1, e2, e3, wx, wy, wz]`.
+            4. `state_history` (list): A record of the rocket's state at each
+               step throughout the simulation. The state_history is organized as a
+               list of lists, with each sublist containing a state vector. The last
+               item in the list always corresponds to the previous state vector,
+               providing a chronological sequence of the rocket's evolving states.
+            5. `observed_variables` (list): A list containing the variables that
+               the controller function returns. The initial value in the first
+               step of the simulation of this list is provided by the
+               `initial_observed_variables` argument.
+            6. `interactive_objects` (list): A list containing the objects that
+               the controller function can interact with. The objects are
+               listed in the same order as they are provided in the
+               `interactive_objects`
+            7. `sensors` (list): A list of sensors that are attached to the
+                rocket. The most recent measurements of the sensors are provided
+                with the ``sensor.measurement`` attribute. The sensors are
+                listed in the same order as they are added to the rocket
+               ``interactive_objects``
+
+            This function will be called during the simulation at the specified
+            sampling rate. The function should evaluate and change the observed
+            objects as needed. The function should return None.
+
+            .. note::
+
+                The function will be called according to the sampling rate specified.
+
+        sampling_rate : float
+            The sampling rate of the controller function in Hertz (Hz). This
+            means that the controller function will be called every
+            `1/sampling_rate` seconds.
+        reference_area : float, optional
+            Reference area used to calculate the drag force of the air brakes
+            from the drag coefficient curve. If None, which is default, use
+            rocket section area. Must be given in squared meters.
+        initial_observed_variables : list, optional
+            A list of the initial values of the variables that the controller
+            function returns. This list is used to initialize the
+            `observed_variables` argument of the controller function. The
+            default value is None, which initializes the list as an empty list.
+        return_controller : bool, optional
+            If True, the function will return the controller object created.
+            Default is False.
+        name : string, optional
+            Canards name, such as drogue and main. Has no impact in
+            simulation, as it is only used to display data in a more
+            organized matter.
+        controller_name : string, optional
+            Controller name. Has no impact in simulation, as it is only used to
+            display data in a more organized matter.
+
+        Returns
+        -------
+        canards : Canards
+            AirBrakes object created.
+        controller : Controller
+            Controller object created.
+        """
+        reference_area = reference_area if reference_area is not None else self.area
+        canards = Canards(
+            reference_area=reference_area,
+            reference_length=reference_length,
+            coefficients={
+                "cL": lift_coefficient_curve,
+                "cD": drag_coefficient_curve
+            },
+            center_of_pressure=cop_curve,
+            name=name,
+        )
+        _controller = _Controller(
+            interactive_objects=canards,
+            controller_function=controller_function,
+            sampling_rate=sampling_rate,
+            initial_observed_variables=initial_observed_variables,
+            name=controller_name,
+        )
+        self.canards.append(canards)
+        self._add_controllers(_controller)
+        if return_controller:
+            return canards, _controller
+        else:
+            return canards
+
+
     def set_rail_buttons(
         self,
         upper_button_position,
@@ -1958,6 +2076,7 @@ class Rocket:
             "rail_buttons": self.rail_buttons,
             "parachutes": self.parachutes,
             "air_brakes": self.air_brakes,
+            "canards": self.canards,
             "_controllers": self._controllers,
             "sensors": self.sensors,
         }
