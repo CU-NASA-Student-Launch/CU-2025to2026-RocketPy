@@ -80,6 +80,10 @@ class Canards(GenericSurface):
     
     @alpha.setter
     def alpha(self, value: float):
+        # update center of pressure
+        # cop = some function of alpha
+        # can access cop using self.cp
+
         self.alpha = value
 
     def compute_forces_and_moments(

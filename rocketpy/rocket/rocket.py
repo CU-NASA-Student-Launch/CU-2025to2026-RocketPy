@@ -1731,8 +1731,8 @@ class Rocket:
         reference_area=None,
         initial_observed_variables=None,
         return_controller=False,
-        name="AirBrakes",
-        controller_name="AirBrakes Controller",
+        name="Canards",
+        controller_name="Canards Controller",
     ):
         """Creates a new canards system, storing its parameters such as
         drag coefficient curve, controller function, sampling rate, and
@@ -1742,7 +1742,7 @@ class Rocket:
         ----------
         drag_coefficient_curve : int, float, callable, array, string, Function
         lift_coefficient_curve: str
-        cop_curve : string    
+        cop : string    
         controller_function : function, callable
             An user-defined function responsible for controlling the simulation.
             This function is expected to take the following arguments, in order:
@@ -1818,7 +1818,7 @@ class Rocket:
                 "cL": lift_coefficient_curve,
                 "cD": drag_coefficient_curve
             },
-            center_of_pressure=cop_curve,
+            center_of_pressure=(0, 0, 0),
             name=name,
         )
         _controller = _Controller(
@@ -1830,6 +1830,8 @@ class Rocket:
         )
         self.canards.append(canards)
         self._add_controllers(_controller)
+        self.add_surfaces(canards, (0, 0, 0.2)) # double check the 0.2
+
         if return_controller:
             return canards, _controller
         else:
