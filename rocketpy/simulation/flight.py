@@ -1579,6 +1579,7 @@ class Flight:
                     * (-5*10**(-7)) * (air_brakes.deployment_level * 40)**2 + 0.0001 * (air_brakes.deployment_level * 40) + 0.0092 # (self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))
                     * air_brakes_cd
                 )
+                print("THIS IS THE NEW ROCKETPY VERSION")
                 if air_brakes.override_rocket_drag:
                     R3 = air_brakes_force  # Substitutes rocket drag coefficient
                 else:
@@ -1872,6 +1873,7 @@ class Flight:
                     * (-5*10**(-7)) * (air_brakes.deployment_level * 40)**2 + 0.0001 * (air_brakes.deployment_level * 40) + 0.0092 # (self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))
                     * air_brakes_cd
                 )
+                print("THIS IS THE NEW ROCKETPY VERSION")
                 if air_brakes.override_rocket_drag:
                     R3 = air_brakes_force  # Substitutes rocket drag coefficient
                 else:
