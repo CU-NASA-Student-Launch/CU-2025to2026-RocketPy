@@ -1863,7 +1863,7 @@ class Flight:
                 # CUSTOM CODE
                 with open('CSVlog/u_dot_gen_var_log.csv', mode='a') as f:
                     writer = csv.writer(f)
-                    writer.writerow([str(t), str(rho), str(free_stream_speed), str(air_brakes.deployment_level), str(air_brakes_cd), str(self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))])
+                    writer.writerow([str(t), str(rho), str(self.z(t)), str(free_stream_speed), str(air_brakes.deployment_level), str(air_brakes_cd), str((-5*10**(-7)) * (air_brakes.deployment_level * 40)**2 + 0.0001 * (air_brakes.deployment_level * 40) + 0.0092), str(self.az(t))])
                 
 
                 air_brakes_force = (
