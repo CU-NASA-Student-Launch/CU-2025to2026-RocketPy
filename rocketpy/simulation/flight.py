@@ -1860,11 +1860,12 @@ class Flight:
                     air_brakes.deployment_level, free_stream_mach
                 )
                 
-                # CUSTOM CODE
-                with open('CSVlog/u_dot_gen_var_log.csv', mode='a') as f:
-                    writer = csv.writer(f)
-                    writer.writerow([str(t), str(rho), str(self.z(t)), str(free_stream_speed), str(air_brakes.deployment_level), str(air_brakes_cd), str((-5*10**(-7)) * (air_brakes.deployment_level * 40)**2 + 0.0001 * (air_brakes.deployment_level * 40) + 0.0092), str(self.az(t))])
-                
+                if(t % 0.1 == 0): # Print data every 0.1 seconds
+                    # CUSTOM CODE
+                    with open('CSVlog/u_dot_gen_var_log.csv', mode='a') as f:
+                        writer = csv.writer(f)
+                        writer.writerow([str(t), str(rho), str(free_stream_speed), str(air_brakes.deployment_level), str(air_brakes_cd), str((-5*10**(-7)) * (air_brakes.deployment_level * 40)**2 + 0.0001 * (air_brakes.deployment_level * 40) + 0.0092)])
+                    
 
                 air_brakes_force = (
                     -0.5
@@ -1873,7 +1874,7 @@ class Flight:
                     * (-5*10**(-7)) * (air_brakes.deployment_level * 40)**2 + 0.0001 * (air_brakes.deployment_level * 40) + 0.0092 # (self.rocket.area + 0.0001 * (air_brakes.deployment_level * 40))
                     * air_brakes_cd
                 )
-                print("THIS IS THE NEW ROCKETPY VERSION")
+                
                 if air_brakes.override_rocket_drag:
                     R3 = air_brakes_force  # Substitutes rocket drag coefficient
                 else:
